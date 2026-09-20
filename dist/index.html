@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="2시간 안에 첫 전자책을 완성하는 5단계 실습 워크북">
+  <title>AI 전자책 디자인·출판 클래스 실습실</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">AI</span>
+        <div>
+          <strong>AI 전자책 디자인·출판 클래스</strong>
+          <span>실습 워크북</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="save-status" id="saveStatus" role="status"><span></span> 자동 저장됨</div>
+        <button class="ghost-button" id="sampleButton" type="button">예시로 채우기</button>
+        <button class="icon-button" id="resetButton" type="button" aria-label="모든 내용 초기화" title="모든 내용 초기화">↺</button>
+      </div>
+    </header>
+
+    <aside class="sidebar" aria-label="실습 단계">
+      <div class="class-clock">
+        <div>
+          <span class="eyebrow">수업 시간</span>
+          <strong id="clockDisplay">120:00</strong>
+        </div>
+        <button id="clockButton" type="button">타이머 시작</button>
+      </div>
+
+      <nav class="step-nav" id="stepNav">
+        <button class="step-link active" data-step="1" type="button">
+          <span class="step-number">1</span>
+          <span><b>나의 첫 전자책</b><small>기획 · 원고 만들기</small></span>
+          <span class="step-check" aria-hidden="true">✓</span>
+        </button>
+        <button class="step-link" data-step="2" type="button">
+          <span class="step-number">2</span>
+          <span><b>표지 콘텐츠 기획</b><small>제목 · 부제 · 분위기</small></span>
+          <span class="step-check" aria-hidden="true">✓</span>
+        </button>
+        <button class="step-link" data-step="3" type="button">
+          <span class="step-number">3</span>
+          <span><b>AI 이미지 만들기</b><small>표지 · 삽화 프롬프트</small></span>
+          <span class="step-check" aria-hidden="true">✓</span>
+        </button>
+        <button class="step-link" data-step="4" type="button">
+          <span class="step-number">4</span>
+          <span><b>보기 좋게 편집</b><small>페이지 · Canva 배치</small></span>
+          <span class="step-check" aria-hidden="true">✓</span>
+        </button>
+        <button class="step-link" data-step="5" type="button">
+          <span class="step-number">5</span>
+          <span><b>PDF 완성 및 공유</b><small>점검 · 저장 · 공유</small></span>
+          <span class="step-check" aria-hidden="true">✓</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-tip">
+        <span aria-hidden="true">!</span>
+        <p><b>막히면 이렇게 하세요</b>완벽하게 쓰려 하지 말고 예시를 먼저 선택한 뒤 내 내용으로 바꾸세요.</p>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section class="progress-panel" aria-labelledby="progressTitle">
+        <div>
+          <span class="eyebrow">오늘의 목표</span>
+          <h1 id="progressTitle">내 이름이 들어간 PDF 전자책 1권</h1>
+        </div>
+        <div class="progress-summary">
+          <span><b id="progressPercent">0%</b> 완성</span>
+          <div class="progress-track" aria-hidden="true"><div id="progressBar"></div></div>
+        </div>
+      </section>
+
+      <section class="step-panel active" data-panel="1">
+        <div class="step-heading">
+          <div><span class="step-kicker">STEP 01 · 권장 30분</span><h2>나의 첫 전자책 완성하기</h2><p>주제와 독자를 정한 뒤, AI에게 책의 설계도와 원고를 요청합니다.</p></div>
+          <span class="time-chip">00—30분</span>
+        </div>
+
+        <div class="notice"><b>오늘은 ‘완벽한 책’보다 ‘완성된 책’이 목표입니다.</b><span>한 페이지에 한 가지 팁만 담으면 짧은 시간에도 읽기 좋은 책이 됩니다.</span></div>
+
+        <div class="card">
+          <div class="card-title"><span>1</span><div><h3>책의 출발점 적기</h3><p>아는 것이 많지 않아도 괜찮아요. 직접 해본 경험이면 충분합니다.</p></div></div>
+          <div class="example-row" aria-label="예시 주제">
+            <span>예시</span>
+            <button class="example-chip" data-example="cafe" type="button">단골을 만드는 카페 운영법</button>
+            <button class="example-chip" data-example="career" type="button">신중년 재취업 준비 노트</button>
+            <button class="example-chip" data-example="home" type="button">냉장고 정리로 식비 줄이기</button>
+          </div>
+          <div class="form-grid">
+            <label>책을 쓰는 사람 <input data-field="author" placeholder="예: 김지혜" autocomplete="name"></label>
+            <label>전자책 주제 <input data-field="topic" placeholder="예: 작은 카페 단골 만들기"></label>
+            <label>읽을 사람 <input data-field="reader" placeholder="예: 카페를 처음 운영하는 사장님"></label>
+            <label>독자가 얻게 될 것 <input data-field="benefit" placeholder="예: 바로 실천할 단골 관리 방법 10가지"></label>
+          </div>
+        </div>
+
+        <div class="card prompt-card">
+          <div class="card-title"><span>2</span><div><h3>AI에 책 설계 요청하기</h3><p>빈칸이 채워지면 아래 프롬프트가 자동으로 완성됩니다.</p></div></div>
+          <div class="prompt-box"><div class="prompt-label">복사해서 ChatGPT · Claude · 뤼튼에 붙여넣기</div><pre id="planPrompt"></pre><button class="copy-button" data-copy="planPrompt" type="button">프롬프트 복사</button></div>
+          <label class="result-label">AI가 만든 제목·목차를 여기에 붙여넣으세요<textarea data-field="outline" rows="9" placeholder="AI 답변을 이곳에 붙여넣으면 자동 저장됩니다."></textarea></label>
+        </div>
+
+        <div class="card prompt-card">
+          <div class="card-title"><span>3</span><div><h3>본문 원고 만들기</h3><p>한 번에 너무 길게 만들지 않고 PART별 4쪽씩 요청합니다.</p></div></div>
+          <div class="prompt-box"><div class="prompt-label">PART 1부터 차례로 생성하기</div><pre id="manuscriptPrompt"></pre><button class="copy-button" data-copy="manuscriptPrompt" type="button">본문 프롬프트 복사</button></div>
+          <label class="result-label">완성된 본문을 모아두세요<textarea data-field="manuscript" rows="12" placeholder="페이지 사이는 --- 로 구분하면 Canva 정리 화면에서 자동으로 나뉩니다."></textarea></label>
+          <p class="helper">팁: PART 1이 끝나면 프롬프트의 숫자를 2, 3, 4로 바꿔 반복하세요.</p>
+        </div>
+      </section>
+
+      <section class="step-panel" data-panel="2">
+        <div class="step-heading">
+          <div><span class="step-kicker">STEP 02 · 권장 15분</span><h2>표지 콘텐츠 기획</h2><p>표지에 꼭 필요한 말만 남기고, 책의 첫인상을 한 문장으로 정합니다.</p></div>
+          <span class="time-chip">30—45분</span>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>1</span><div><h3>표지 문구 정하기</h3><p>제목은 크고 짧게, 부제는 독자가 얻을 이익이 보이게 씁니다.</p></div></div>
+          <div class="form-grid single-wide">
+            <label>책 제목 <input data-field="title" placeholder="예: 오늘부터 단골 카페"></label>
+            <label>부제 <input data-field="subtitle" placeholder="예: 작은 가게에서 바로 쓰는 고객관리 16가지"></label>
+            <label>저자명 <input data-field="coverAuthor" placeholder="예: 김지혜 지음"></label>
+            <label>한 줄 소개 <input data-field="coverLine" placeholder="예: 손님이 다시 오게 만드는 작은 습관"></label>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>2</span><div><h3>표지 분위기 선택하기</h3><p>세 가지 키워드만 정하면 이미지와 Canva 디자인이 흔들리지 않습니다.</p></div></div>
+          <div class="mood-options" role="radiogroup" aria-label="표지 분위기">
+            <button class="mood-card selected" data-mood="따뜻하고 친근한, 크림색과 오렌지, 손그림 느낌" type="button"><span class="mood-swatch warm"></span><b>따뜻하고 친근하게</b><small>경험담 · 생활 노하우</small></button>
+            <button class="mood-card" data-mood="깔끔하고 전문적인, 짙은 남색과 하늘색, 미니멀한 느낌" type="button"><span class="mood-swatch clean"></span><b>깔끔하고 전문적으로</b><small>업무 · 창업 · 취업</small></button>
+            <button class="mood-card" data-mood="밝고 활기찬, 노란색과 초록색, 경쾌한 느낌" type="button"><span class="mood-swatch bright"></span><b>밝고 활기차게</b><small>취미 · 건강 · 성장</small></button>
+          </div>
+          <label class="result-label">내가 원하는 분위기<textarea data-field="mood" rows="3" placeholder="위에서 선택하거나 직접 적어보세요."></textarea></label>
+        </div>
+        <div class="book-preview-wrap">
+          <div class="book-preview" id="bookPreview"><span class="preview-kicker">PRACTICAL GUIDE</span><h3 id="previewTitle">나의 전자책 제목</h3><p id="previewSubtitle">부제와 독자가 얻을 이익</p><div class="preview-line"></div><strong id="previewAuthor">저자명</strong></div>
+          <div class="preview-note"><span>미리보기</span><h3>좋은 표지는 3초 안에 이해됩니다.</h3><ul><li>제목이 가장 크게 보이나요?</li><li>누구를 위한 책인지 짐작되나요?</li><li>글자가 너무 많지는 않나요?</li></ul></div>
+        </div>
+      </section>
+
+      <section class="step-panel" data-panel="3">
+        <div class="step-heading">
+          <div><span class="step-kicker">STEP 03 · 권장 20분</span><h2>AI 표지·삽화 이미지 만들기</h2><p>완성된 문장을 복사해 이미지 생성 도구에 넣고, 마음에 드는 한 장을 저장합니다.</p></div>
+          <span class="time-chip">45—65분</span>
+        </div>
+        <div class="notice coral"><b>이미지 안에는 글자를 만들지 마세요.</b><span>AI가 만든 글자는 틀릴 수 있습니다. 제목과 저자명은 Canva에서 직접 넣습니다.</span></div>
+        <div class="card prompt-card">
+          <div class="card-title"><span>1</span><div><h3>표지 이미지 프롬프트</h3><p>세로형 전자책 표지에 어울리는 배경 이미지를 만듭니다.</p></div></div>
+          <div class="prompt-box image-prompt"><div class="prompt-label">캔바 매직 미디어 · 이미지 생성 AI에 붙여넣기</div><pre id="coverImagePrompt"></pre><button class="copy-button" data-copy="coverImagePrompt" type="button">표지 프롬프트 복사</button></div>
+          <div class="mini-checks"><span>✓ 세로형 3:4</span><span>✓ 글자 없는 이미지</span><span>✓ 제목 공간 확보</span></div>
+        </div>
+        <div class="card prompt-card">
+          <div class="card-title"><span>2</span><div><h3>본문 삽화 프롬프트</h3><p>내용을 설명하는 이미지보다 분위기를 돕는 이미지 1~2장이면 충분합니다.</p></div></div>
+          <label>삽화에 담을 장면 <input data-field="scene" placeholder="예: 햇살이 들어오는 작은 카페에서 손님을 맞는 사장님"></label>
+          <div class="prompt-box image-prompt"><div class="prompt-label">삽화용 · 가로형 이미지</div><pre id="illustrationPrompt"></pre><button class="copy-button" data-copy="illustrationPrompt" type="button">삽화 프롬프트 복사</button></div>
+          <label class="result-label">만든 이미지 메모<textarea data-field="imageNotes" rows="4" placeholder="예: 표지 1번 이미지 저장, PART 2 앞에 카페 사진 사용"></textarea></label>
+        </div>
+      </section>
+
+      <section class="step-panel" data-panel="4">
+        <div class="step-heading">
+          <div><span class="step-kicker">STEP 04 · 권장 40분</span><h2>원고와 이미지를 보기 좋게 편집</h2><p>Canva에서 한 장을 먼저 완성한 뒤 복제하면 빠르고 일관되게 만들 수 있습니다.</p></div>
+          <span class="time-chip">65—105분</span>
+        </div>
+        <div class="workflow-strip"><div><b>①</b><span>Canva 문서 만들기<small>A4 세로형</small></span></div><i>→</i><div><b>②</b><span>표지 먼저 완성<small>제목 · 이미지 · 저자</small></span></div><i>→</i><div><b>③</b><span>본문 1쪽 디자인<small>제목 · 본문 · 팁</small></span></div><i>→</i><div><b>④</b><span>페이지 복제<small>내용만 바꾸기</small></span></div></div>
+        <div class="card">
+          <div class="card-title"><span>1</span><div><h3>20쪽 구성표</h3><p>본문 수가 부족하면 페이지 수보다 완성을 우선하세요.</p></div></div>
+          <div class="page-map">
+            <div class="page-card cover"><b>01</b><span>표지</span></div><div class="page-card"><b>02</b><span>프롤로그</span></div><div class="page-card"><b>03</b><span>목차</span></div><div class="page-card part"><b>04—07</b><span>PART 1</span></div><div class="page-card part"><b>08—11</b><span>PART 2</span></div><div class="page-card part"><b>12—15</b><span>PART 3</span></div><div class="page-card part"><b>16—19</b><span>PART 4</span></div><div class="page-card end"><b>20</b><span>체크리스트·마무리</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span>2</span><div><h3>Canva로 옮길 내용 정리</h3><p>현재까지 입력한 내용을 페이지별로 모았습니다. 필요한 블록만 복사하세요.</p></div></div>
+          <div class="transfer-toolbar"><span id="pageCount">본문 0개 감지</span><button class="primary-button" id="copyAllButton" type="button">전체 내용 복사</button></div>
+          <div class="transfer-list" id="transferList"></div>
+        </div>
+        <div class="card checklist-card">
+          <div class="card-title"><span>3</span><div><h3>읽기 쉬운지 확인</h3><p>디자인보다 먼저 글이 편하게 읽히는지 살펴봅니다.</p></div></div>
+          <div class="check-grid">
+            <label><input type="checkbox" data-check="edit1"><span><b>본문 글자 크기</b>최소 14pt 이상</span></label>
+            <label><input type="checkbox" data-check="edit2"><span><b>한 페이지 한 주제</b>내용을 욕심내지 않기</span></label>
+            <label><input type="checkbox" data-check="edit3"><span><b>같은 글꼴 사용</b>2종류 이내로 통일</span></label>
+            <label><input type="checkbox" data-check="edit4"><span><b>여백 남기기</b>글자를 꽉 채우지 않기</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="step-panel" data-panel="5">
+        <div class="step-heading">
+          <div><span class="step-kicker">STEP 05 · 권장 15분</span><h2>전자책 PDF 완성 및 공유</h2><p>마지막 점검을 마친 뒤 PDF로 내려받고, 실제로 열리는지 확인합니다.</p></div>
+          <span class="time-chip">105—120분</span>
+        </div>
+        <div class="finish-hero"><div class="finish-icon">PDF</div><div><span class="eyebrow">거의 다 왔어요</span><h3 id="finishTitle">나의 첫 전자책</h3><p>아래 5가지만 확인하면 오늘의 목표가 완성됩니다.</p></div></div>
+        <div class="card final-check-card">
+          <div class="card-title"><span>✓</span><div><h3>최종 점검</h3><p>확인한 항목을 눌러 완료 표시하세요.</p></div></div>
+          <div class="final-checks">
+            <label><input type="checkbox" data-check="final1"><span><b>표지에 제목과 저자명이 보입니다.</b><small>작은 화면에서도 읽히는지 확인</small></span></label>
+            <label><input type="checkbox" data-check="final2"><span><b>목차와 본문 순서가 맞습니다.</b><small>빠진 페이지가 없는지 확인</small></span></label>
+            <label><input type="checkbox" data-check="final3"><span><b>오탈자와 잘린 글자가 없습니다.</b><small>Canva 전체 화면으로 한 번 훑어보기</small></span></label>
+            <label><input type="checkbox" data-check="final4"><span><b>PDF 표준으로 다운로드했습니다.</b><small>Canva 공유 → 다운로드 → PDF 표준</small></span></label>
+            <label><input type="checkbox" data-check="final5"><span><b>내 컴퓨터에서 PDF가 열립니다.</b><small>다운로드한 파일을 직접 열어보기</small></span></label>
+          </div>
+        </div>
+        <div class="card export-card">
+          <div class="card-title"><span>↓</span><div><h3>내 작업도 함께 보관하기</h3><p>나중에 수정할 수 있도록 이 워크북의 입력 내용을 파일로 저장하세요.</p></div></div>
+          <label>PDF 파일 이름 <div class="filename-row"><input data-field="filename" placeholder="예: 오늘부터_단골카페_김지혜.pdf"><span>.pdf</span></div></label>
+          <div class="export-actions"><button class="primary-button" id="downloadButton" type="button">워크북 내용 저장</button><button class="secondary-button" id="printButton" type="button">정리 화면 인쇄</button></div>
+        </div>
+        <div class="completion-card" id="completionCard"><span class="confetti" aria-hidden="true">✦</span><div><h3>첫 전자책 완성을 축하합니다!</h3><p>PDF를 열어 확인했다면, 오늘의 실습은 성공입니다.</p></div><button id="completeButton" type="button">수업 완료하기</button></div>
+      </section>
+
+      <div class="step-footer">
+        <button class="secondary-button" id="prevButton" type="button" disabled>이전 단계</button>
+        <div class="step-dots" id="stepDots" aria-label="현재 단계"><span class="active"></span><span></span><span></span><span></span><span></span></div>
+        <button class="primary-button" id="nextButton" type="button">저장하고 다음 단계</button>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">복사했습니다</div>
+  <dialog id="resetDialog"><h3>처음부터 다시 시작할까요?</h3><p>입력한 내용과 진행 상태가 모두 지워집니다.</p><div><button class="secondary-button" id="cancelReset" type="button">취소</button><button class="danger-button" id="confirmReset" type="button">모두 지우기</button></div></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
