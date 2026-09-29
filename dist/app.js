@@ -2,12 +2,15 @@
   const STORAGE_KEY = 'ai-ebook-class-workbook-v1';
   const defaults = {
     fields: { mood: '따뜻하고 친근한, 크림색과 오렌지, 손그림 느낌' },
+    genre: 'practical',
+    part: 1,
     checks: {},
     completedSteps: [],
     currentStep: 1,
     classCompleted: false,
     timer: { running: false, remaining: 7200, updatedAt: null }
   };
+  const genreNames = { practical: '실용서', fiction: '소설', essay: '에세이' };
   let state = loadState();
   let toastTimer;
   let clockTimer;
@@ -15,6 +18,11 @@
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const field = (name) => (state.fields[name] || '').trim();
+  const genreHints = {
+    practical: { guide: '실용서: ‘누가, 어떤 문제를, 어떤 방법으로 해결하는가?’를 한 문장으로 적어보세요.', benefit: '독자가 얻게 될 것', benefitPlaceholder: '예: 바로 실천할 단골 관리 방법', final: '체크리스트·마무리' },
+    fiction: { guide: '소설: ‘어디서, 누가, 어떤 갈등을 겪고 무엇을 선택하는가?’를 적어보세요.', benefit: '독자가 따라갈 갈등·질문', benefitPlaceholder: '예: 두 사람이 오래 숨긴 비밀을 밝힐지', final: '결말·작가의 말' },
+    essay: { guide: '에세이: ‘어떤 실제 장면에서 무엇을 떠올리고 어떤 의미를 찾는가?’를 적어보세요.', benefit: '독자에게 남길 감정·생각', benefitPlaceholder: '예: 익숙한 공간과 이별하며 배운 관계의 의미', final: '맺음말·저자 소개' }
+  };
 
   function loadState() {
     try {
@@ -22,6 +30,8 @@
       return {
         ...structuredClone(defaults),
         ...saved,
+        genre: genreNames[saved?.genre] ? saved.genre : 'practical',
+        part: [1, 2, 3, 4].includes(Number(saved?.part)) ? Number(saved.part) : 1,
         fields: { ...defaults.fields, ...(saved?.fields || {}) },
         checks: { ...(saved?.checks || {}) },
         timer: { ...defaults.timer, ...(saved?.timer || {}) }
@@ -51,6 +61,12 @@
     $$('[data-check]').forEach(el => { el.checked = Boolean(state.checks[el.dataset.check]); });
     const selectedMood = field('mood');
     $$('.mood-card').forEach(card => card.classList.toggle('selected', card.dataset.mood === selectedMood));
+    $$('.genre-card').forEach(card => {
+      const selected = card.dataset.genre === state.genre;
+      card.classList.toggle('selected', selected);
+      card.setAttribute('aria-checked', String(selected));
+    });
+    $$('.part-button').forEach(button => button.classList.toggle('selected', Number(button.dataset.part) === state.part));
   }
 
   function fallback(value, text) { return value || `[${text}]`; }
@@ -58,21 +74,44 @@
   function updatePrompts() {
     const topic = fallback(field('topic'), '전자책 주제');
     const reader = fallback(field('reader'), '읽을 사람');
-    const benefit = fallback(field('benefit'), '독자가 얻게 될 것');
+    const benefit = fallback(field('benefit'), genreHints[state.genre].benefit);
     const title = fallback(field('title'), '책 제목');
     const mood = fallback(field('mood'), '원하는 분위기');
-    const scene = fallback(field('scene'), `${topic}을 실천하는 자연스러운 장면`);
+    const scene = fallback(field('scene'), state.genre === 'fiction' ? `${topic}의 중요한 장면` : state.genre === 'essay' ? `${topic}과 연결되는 실제 기억의 장면` : `${topic}을 실천하는 자연스러운 장면`);
+    const genre = genreNames[state.genre];
+    const outlineInstruction = {
+      practical: '각 PART에 독자가 바로 해볼 수 있는 소주제 4개를 배치하고, 마지막 쪽에는 실천 체크리스트를 제안해 주세요.',
+      fiction: '각 PART에 장면 4개를 배치하고, 인물의 목표·갈등·선택·결말이 이어지게 해 주세요. 마지막 쪽은 결말과 작가의 말에 활용합니다.',
+      essay: '각 PART에 실제 장면이나 기억 4개를 배치하고, 장면에서 생각의 변화가 자연스럽게 드러나게 해 주세요. 마지막 쪽은 맺음말과 저자 소개에 활용합니다.'
+    }[state.genre];
+    const pageInstruction = {
+      practical: '각 쪽은 소제목, 공감되는 도입, 핵심 설명, 바로 해볼 방법, 마지막 실천 팁으로 구성해 주세요.',
+      fiction: '각 쪽은 소제목, 장면의 장소와 인물, 새로 생기는 사건, 인물의 반응, 다음 장면으로 이어지는 변화로 구성해 주세요. 설명보다 행동과 대화를 살려 주세요.',
+      essay: '각 쪽은 소제목, 실제 있었던 장면, 그때의 감각이나 생각, 지금 돌아본 의미로 구성해 주세요. 겪지 않은 일을 사실처럼 만들어내지 말고 필요한 정보는 질문해 주세요.'
+    }[state.genre];
+    const outline = field('outline');
+    const outlineContext = outline ? `\n\n확정한 목차:\n${outline}` : '\n\n앞서 만든 목차가 없다면 PART 제목과 소주제를 먼저 간단히 정해 주세요.';
 
-    $('#planPrompt').textContent = `당신은 초보자를 돕는 실용 전자책 편집자입니다.\n\n주제: ${topic}\n독자: ${reader}\n독자가 얻게 될 것: ${benefit}\n\n아래 순서로 20쪽 미니 전자책의 설계도만 만들어 주세요.\n1. 이해하기 쉬운 제목 후보 3개와 부제 후보 3개\n2. 프롤로그 핵심 내용\n3. 4개의 PART 제목\n4. 각 PART마다 실용적인 소주제 4개(총 16개)\n5. 마지막 실천 체크리스트 5개\n\n아직 본문은 쓰지 말고, 초보자가 바로 따라 할 구체적인 주제로 구성해 주세요.`;
+    $('#planPrompt').textContent = `당신은 초보자를 돕는 ${genre} 전자책 편집자입니다.\n\n책 종류: ${genre}\n주제: ${topic}\n읽을 사람: ${reader}\n${genreHints[state.genre].benefit}: ${benefit}\n\n20쪽 안팎의 작은 전자책 설계도만 만들어 주세요.\n1. 제목 후보 3개와 부제 후보 3개\n2. 프롤로그의 핵심 내용\n3. 네 개의 PART 제목과 각 PART의 소주제 4개\n4. 마지막 쪽에 넣을 내용\n\n${outlineInstruction}\n비슷한 내용은 합치고 범위가 넓은 곳은 짚어 주세요. 아직 본문은 쓰지 마세요.`;
 
-    $('#manuscriptPrompt').textContent = `방금 설계한 「${title}」 중 PART 1의 4개 주제를 전자책 원고로 작성해 주세요.\n\n각 페이지 형식:\n- 짧고 분명한 소제목\n- 공감되는 도입 2문장\n- 핵심 설명과 바로 해볼 방법\n- 마지막에 ‘오늘의 실천 팁’ 1개\n\n페이지당 250~350자, 쉬운 말과 짧은 문장으로 써 주세요. 페이지 사이는 --- 로 구분해 주세요.`;
+    $('#manuscriptPrompt').textContent = `당신은 ${genre} 전자책 편집자입니다. 「${title}」의 PART ${state.part}에 들어갈 원고 4쪽을 작성해 주세요.\n주제: ${topic}\n읽을 사람: ${reader}\n${genreHints[state.genre].benefit}: ${benefit}${outlineContext}\n\n${pageInstruction}\n쪽마다 약 250~350자 초안으로 쓰고, 각 쪽 사이는 --- 한 줄로 구분해 주세요. 반복되는 문장은 줄이고, 확인되지 않은 사실이나 나의 경험을 지어내지 마세요.`;
 
-    $('#coverImagePrompt').textContent = `${topic}을 주제로 한 세로형 전자책 표지 배경 이미지. ${mood}. ${reader}이 편안하게 느낄 수 있는 단순하고 선명한 구성. 위쪽과 중앙에 제목을 넣을 넓은 여백. 고품질, 세로 3:4 비율. 이미지 안에 글자, 문자, 로고, 워터마크는 넣지 말 것.`;
+    const visualSubject = state.genre === 'practical' ? `${topic}을 떠올리게 하는 물건이나 공간` : state.genre === 'fiction' ? `${topic}의 핵심 장소나 상징적인 장면` : `${topic}과 연결되는 실제 공간이나 사물`;
+    $('#coverImagePrompt').textContent = `${genre} 「${title}」의 세로형 전자책 표지 배경. ${visualSubject}. ${mood}. ${reader}이 책의 분위기를 짐작할 수 있는 단순하고 선명한 구도. 제목을 Canva에서 넣을 수 있도록 넓은 여백 확보. 고품질, 세로 3:4 비율. 이미지 안에 글자, 문자, 로고, 워터마크는 넣지 말 것.`;
 
-    $('#illustrationPrompt').textContent = `${scene}. ${mood}. 실용 전자책 본문에 어울리는 자연스럽고 단정한 삽화, 한눈에 이해되는 단순한 구도, 가로 4:3 비율, 고품질. 이미지 안에 글자, 문자, 로고, 워터마크는 넣지 말 것.`;
+    $('#illustrationPrompt').textContent = `${scene}. ${mood}. ${genre} 본문에 어울리는 삽화, 한눈에 알아볼 수 있는 구도, 가로 4:3 비율, 고품질. 이미지 안에 글자, 문자, 로고, 워터마크는 넣지 말 것.`;
+  }
+
+  function updateGenre() {
+    const info = genreHints[state.genre];
+    $('#genreGuide').textContent = info.guide;
+    $('#benefitLabel').firstChild.textContent = `${info.benefit} `;
+    $('[data-field="benefit"]').placeholder = info.benefitPlaceholder;
+    $('#finalPageLabel').textContent = info.final;
   }
 
   function updatePreview() {
+    $('#previewGenre').textContent = { practical: 'PRACTICAL GUIDE', fiction: 'SHORT FICTION', essay: 'PERSONAL ESSAY' }[state.genre];
     $('#previewTitle').textContent = field('title') || '나의 전자책 제목';
     $('#previewSubtitle').textContent = field('subtitle') || '부제와 독자가 얻을 이익';
     $('#previewAuthor').textContent = field('coverAuthor') || field('author') || '저자명';
@@ -102,7 +141,7 @@
       { no: '02—03', title: '프롤로그 · 목차', text: intro }
     ];
     pages.forEach((text, index) => blocks.push({ no: String(index + 4).padStart(2, '0'), title: firstLine(text) || `본문 ${index + 1}`, text }));
-    blocks.push({ no: '마지막', title: '마무리 · 저자', text: `${field('benefit')}\n\n저자: ${field('author')}`.trim() });
+    blocks.push({ no: '20', title: genreHints[state.genre].final, text: `${field('benefit')}\n\n저자: ${field('author')}`.trim() });
     return blocks;
   }
 
@@ -114,7 +153,7 @@
     const root = $('#transferList');
     root.replaceChildren();
     const pages = getPages();
-    $('#pageCount').textContent = `본문 ${pages.length}개 감지 · 총 ${pages.length + 3}개 블록`;
+    $('#pageCount').textContent = `본문 ${pages.length}개 감지 · 20쪽은 예시 구성`;
     const blocks = transferBlocks().filter(block => block.text);
     if (!blocks.length) {
       const empty = document.createElement('div');
@@ -176,18 +215,24 @@
 
   function fillSample(type = 'cafe') {
     const samples = {
-      cafe: { author: '김지혜', topic: '작은 카페에서 단골을 만드는 방법', reader: '카페를 처음 운영하는 사장님', benefit: '바로 실천할 수 있는 단골 관리 방법 16가지', title: '오늘부터 단골 카페', subtitle: '작은 가게에서 바로 쓰는 고객관리 16가지', coverAuthor: '김지혜 지음', coverLine: '손님이 다시 오게 만드는 작은 습관', scene: '햇살이 들어오는 작은 동네 카페에서 단골손님을 반갑게 맞는 사장님', filename: '오늘부터_단골카페_김지혜' },
-      career: { author: '박성호', topic: '50대 신중년의 재취업 준비', reader: '경력은 많지만 다시 시작이 막막한 50대 구직자', benefit: '나의 경력을 강점으로 바꾸는 재취업 준비 순서', title: '다시, 일할 시간', subtitle: '신중년을 위한 재취업 준비 노트', coverAuthor: '박성호 지음', coverLine: '경력은 끝이 아니라 새로운 출발점입니다', scene: '밝은 책상에서 노트북과 이력서를 정리하는 50대 한국인 구직자', filename: '다시_일할시간_박성호' },
-      home: { author: '이수민', topic: '냉장고 정리로 한 달 식비 줄이기', reader: '장본 식재료를 자주 버리는 1인 가구와 주부', benefit: '재료를 남김없이 쓰는 정리와 식단 습관', title: '냉장고가 가벼워졌다', subtitle: '버리는 식재료 없이 식비를 줄이는 16가지 습관', coverAuthor: '이수민 지음', coverLine: '정리 한 번으로 장보기와 식사가 쉬워집니다', scene: '종류별로 깔끔하게 정리된 밝은 가정집 냉장고와 식재료 바구니', filename: '냉장고가_가벼워졌다_이수민' }
+      cafe: { genre: 'practical', author: '김지혜', topic: '작은 카페에서 단골을 만드는 방법', reader: '카페를 처음 운영하는 사장님', benefit: '바로 실천할 수 있는 단골 관리 방법 16가지', title: '오늘부터 단골 카페', subtitle: '작은 가게에서 바로 쓰는 고객관리 16가지', coverAuthor: '김지혜 지음', coverLine: '손님이 다시 오게 만드는 작은 습관', scene: '햇살이 들어오는 작은 동네 카페에서 단골손님을 반갑게 맞는 사장님', filename: '오늘부터_단골카페_김지혜' },
+      career: { genre: 'practical', author: '박성호', topic: '50대 신중년의 재취업 준비', reader: '경력은 많지만 다시 시작이 막막한 50대 구직자', benefit: '나의 경력을 강점으로 바꾸는 재취업 준비 순서', title: '다시, 일할 시간', subtitle: '신중년을 위한 재취업 준비 노트', coverAuthor: '박성호 지음', coverLine: '경력은 끝이 아니라 새로운 출발점입니다', scene: '밝은 책상에서 노트북과 이력서를 정리하는 50대 한국인 구직자', filename: '다시_일할시간_박성호' },
+      home: { genre: 'practical', author: '이수민', topic: '냉장고 정리로 한 달 식비 줄이기', reader: '장본 식재료를 자주 버리는 1인 가구와 주부', benefit: '재료를 남김없이 쓰는 정리와 식단 습관', title: '냉장고가 가벼워졌다', subtitle: '버리는 식재료 없이 식비를 줄이는 16가지 습관', coverAuthor: '이수민 지음', coverLine: '정리 한 번으로 장보기와 식사가 쉬워집니다', scene: '종류별로 깔끔하게 정리된 밝은 가정집 냉장고와 식재료 바구니', filename: '냉장고가_가벼워졌다_이수민' },
+      fiction: { genre: 'fiction', author: '한지우', topic: '막차가 끊긴 해안역에서 재회한 두 사람이 오래 숨긴 비밀을 밝힐지 결정하는 이야기', reader: '짧지만 여운이 남는 관계 이야기를 좋아하는 독자', benefit: '두 사람이 과거의 비밀을 밝히고 다시 서로를 믿을 수 있을지', title: '마지막 열차가 떠난 뒤', subtitle: '해안역에서 다시 만난 두 사람의 밤', coverAuthor: '한지우 지음', coverLine: '끝난 줄 알았던 이야기가 다시 시작된다', scene: '늦은 밤 불이 켜진 작은 해안역 플랫폼에 마주 선 두 사람의 뒷모습', filename: '마지막_열차가_떠난_뒤_한지우' },
+      essay: { genre: 'essay', author: '윤서연', topic: '작은 카페의 마지막 영업일에 떠올린 다섯 장면과 일의 의미', reader: '일과 공간을 정리하며 새로운 시작을 준비하는 사람', benefit: '익숙한 공간과 이별하며 발견한 관계와 일의 의미', title: '마지막 잔을 내린 날', subtitle: '작은 카페에서 배운 일과 이별', coverAuthor: '윤서연 지음', coverLine: '문을 닫는 날에야 보인 것들', scene: '해 질 무렵 문을 닫기 전 작은 카페의 빈 의자와 반쯤 남은 커피잔', filename: '마지막_잔을_내린_날_윤서연' }
     };
-    Object.assign(state.fields, samples[type] || samples.cafe);
+    const sample = samples[type] || samples.cafe;
+    if (['topic', 'title', 'reader'].some(key => field(key)) && !window.confirm('예시를 적용하면 현재 책 정보가 바뀝니다. 목차와 원고는 지워지지 않습니다. 계속할까요?')) return;
+    state.genre = sample.genre;
+    const { genre, ...fields } = sample;
+    Object.assign(state.fields, fields);
     hydrateInputs(); updateAll(); saveState();
-    showToast('예시를 채웠습니다. 내 내용으로 바꿔보세요.');
+    showToast('예시를 채웠습니다. 이름·주제·독자를 내 내용으로 바꿔보세요.');
   }
 
   function compileWorkbookText() {
     const blocks = transferBlocks().filter(x => x.text).map(x => `[${x.no}] ${x.title}\n${x.text}`).join('\n\n--------------------------------\n\n');
-    return `AI 전자책 디자인·출판 클래스 — 실습 결과\n\n책 제목: ${field('title')}\n부제: ${field('subtitle')}\n저자: ${field('author')}\n독자: ${field('reader')}\n핵심 효과: ${field('benefit')}\n표지 분위기: ${field('mood')}\n이미지 메모: ${field('imageNotes')}\n\n================================\n\n${blocks}`;
+    return `AI 전자책 디자인·출판 클래스 — 실습 결과\n\n책 종류: ${genreNames[state.genre]}\n책 제목: ${field('title')}\n부제: ${field('subtitle')}\n저자: ${field('author')}\n독자: ${field('reader')}\n${genreHints[state.genre].benefit}: ${field('benefit')}\n표지 분위기: ${field('mood')}\n이미지 메모: ${field('imageNotes')}\n\n================================\n\n${blocks}`;
   }
 
   function downloadWorkbook() {
@@ -215,7 +260,7 @@
     if (state.timer.running) saveState(false);
   }
 
-  function updateAll() { updatePrompts(); updatePreview(); renderTransfer(); updateProgress(); }
+  function updateAll() { updateGenre(); updatePrompts(); updatePreview(); renderTransfer(); updateProgress(); }
 
   $$('[data-field]').forEach(el => el.addEventListener('input', () => {
     state.fields[el.dataset.field] = el.value;
@@ -233,6 +278,14 @@
 
   $$('.step-link').forEach(link => link.addEventListener('click', () => goToStep(link.dataset.step)));
   $$('.example-chip').forEach(button => button.addEventListener('click', () => fillSample(button.dataset.example)));
+  $$('.genre-card').forEach(button => button.addEventListener('click', () => {
+    state.genre = button.dataset.genre;
+    hydrateInputs(); updateAll(); saveState();
+  }));
+  $$('.part-button').forEach(button => button.addEventListener('click', () => {
+    state.part = Number(button.dataset.part);
+    hydrateInputs(); updatePrompts(); saveState();
+  }));
   $$('.mood-card').forEach(button => button.addEventListener('click', () => {
     state.fields.mood = button.dataset.mood;
     $('[data-field="mood"]').value = button.dataset.mood;

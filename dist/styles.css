@@ -86,6 +86,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 .card-title h3 { margin: 0; font-size: 1.05rem; }
 .card-title p { margin: 3px 0 0; color: var(--ink-soft); font-size: .86rem; }
 .example-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px dashed var(--line); padding-bottom: 17px; margin-bottom: 18px; }
+.genre-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 17px; }
+.genre-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); cursor: pointer; text-align: left; }
+.genre-card.selected { background: var(--yellow-soft); border: 2px solid var(--ink); padding: 11px 13px; }
+.genre-card b { font-size: .9rem; }
+.genre-card small { color: var(--ink-soft); font-size: .73rem; }
+.genre-guide { margin: -3px 0 17px; color: var(--ink-soft); font-size: .82rem; }
 .example-row > span { font-size: .75rem; font-weight: 700; color: var(--coral); }
 .example-chip { border: 1px solid var(--line); background: var(--paper); padding: 6px 10px; border-radius: 99px; font-size: .78rem; cursor: pointer; }
 .example-chip:hover { background: var(--yellow-soft); border-color: #e9c46e; }
@@ -98,6 +104,11 @@ input:hover, textarea:hover { border-color: #9fb0bb; }
 input:focus, textarea:focus { background: white; border-color: var(--ink); }
 ::placeholder { color: #8a9aa6; }
 .prompt-card .result-label { margin-top: 18px; }
+.four-part-tip { display: flex; gap: 10px; margin-top: 13px; padding: 11px 13px; border-radius: 10px; background: var(--mint-soft); font-size: .78rem; color: var(--ink-soft); }
+.four-part-tip b { flex: 0 0 auto; color: var(--ink); }
+.part-options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.part-button { border: 1px solid var(--line); border-radius: 9px; background: var(--paper); padding: 7px 13px; cursor: pointer; font-size: .78rem; font-weight: 700; }
+.part-button.selected { background: var(--ink); border-color: var(--ink); color: white; }
 .prompt-box { position: relative; border-radius: 14px; background: #f1f5f7; border: 1px solid #d9e3e8; padding: 42px 18px 17px; overflow: hidden; }
 .prompt-box.image-prompt { background: #fff8e9; border-color: #eed9a5; }
 .prompt-label { position: absolute; top: 0; left: 0; right: 0; padding: 8px 14px; background: rgba(23,50,77,.06); font-size: .72rem; font-weight: 700; color: var(--ink-soft); }
@@ -182,6 +193,7 @@ input:focus, textarea:focus { background: white; border-color: var(--ink); }
 .completion-card h3 { margin: 0; font-family: "Gowun Dodum", sans-serif; font-size: 1.2rem; }
 .completion-card p { margin: 2px 0 0; color: rgba(255,255,255,.72); font-size: .82rem; }
 .completion-card button { border: 0; border-radius: 10px; background: var(--yellow); padding: 10px 13px; font-weight: 800; cursor: pointer; }
+.after-class-note { margin: 18px 4px 0; color: var(--ink-soft); font-size: .8rem; }
 .step-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
 .step-footer > button:first-child { justify-self: start; }
 .step-footer > button:last-child { justify-self: end; }
@@ -219,7 +231,8 @@ dialog > div { display: flex; justify-content: flex-end; gap: 8px; }
   .progress-panel { align-items: flex-start; gap: 14px; flex-direction: column; }
   .progress-summary { width: 100%; min-width: 0; }
   .step-heading { flex-direction: column; gap: 8px; }
-  .form-grid, .single-wide, .mood-options, .check-grid { grid-template-columns: 1fr; }
+  .form-grid, .single-wide, .mood-options, .genre-options, .check-grid { grid-template-columns: 1fr; }
+  .four-part-tip { flex-direction: column; gap: 3px; }
   .card { padding: 18px; }
   .prompt-box pre { margin-right: 0; padding-bottom: 48px; }
   .book-preview-wrap { grid-template-columns: 1fr; padding: 8px 8px 18px; }

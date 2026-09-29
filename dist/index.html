@@ -20,7 +20,7 @@
       </div>
       <div class="top-actions">
         <div class="save-status" id="saveStatus" role="status"><span></span> 자동 저장됨</div>
-        <button class="ghost-button" id="sampleButton" type="button">예시로 채우기</button>
+        <button class="ghost-button" id="sampleButton" type="button">카페 예시로 채우기</button>
         <button class="icon-button" id="resetButton" type="button" aria-label="모든 내용 초기화" title="모든 내용 초기화">↺</button>
       </div>
     </header>
@@ -82,39 +82,49 @@
 
       <section class="step-panel active" data-panel="1">
         <div class="step-heading">
-          <div><span class="step-kicker">STEP 01 · 권장 30분</span><h2>나의 첫 전자책 완성하기</h2><p>주제와 독자를 정한 뒤, AI에게 책의 설계도와 원고를 요청합니다.</p></div>
+          <div><span class="step-kicker">STEP 01 · 권장 30분</span><h2>나의 첫 전자책 완성하기</h2><p>책의 종류와 독자를 정한 뒤, AI에게 목차와 원고 초안을 요청합니다.</p></div>
           <span class="time-chip">00—30분</span>
         </div>
 
-        <div class="notice"><b>오늘은 ‘완벽한 책’보다 ‘완성된 책’이 목표입니다.</b><span>한 페이지에 한 가지 팁만 담으면 짧은 시간에도 읽기 좋은 책이 됩니다.</span></div>
+        <div class="notice"><b>오늘은 ‘완벽한 책’보다 ‘완성된 책’이 목표입니다.</b><span>실용서는 한 쪽에 한 가지 방법, 소설은 한 장면, 에세이는 한 기억을 담아보세요.</span></div>
 
         <div class="card">
-          <div class="card-title"><span>1</span><div><h3>책의 출발점 적기</h3><p>아는 것이 많지 않아도 괜찮아요. 직접 해본 경험이면 충분합니다.</p></div></div>
+          <div class="card-title"><span>1</span><div><h3>내 책의 출발점 적기</h3><p>책 종류를 고르고, 아래 예시에서 가장 가까운 것을 눌러 내 이야기로 바꾸세요.</p></div></div>
+          <div class="genre-options" role="radiogroup" aria-label="책 종류">
+            <button class="genre-card selected" data-genre="practical" type="button" role="radio" aria-checked="true"><b>실용서</b><small>방법 · 순서 · 체크리스트</small></button>
+            <button class="genre-card" data-genre="fiction" type="button" role="radio" aria-checked="false"><b>소설</b><small>인물 · 사건 · 선택</small></button>
+            <button class="genre-card" data-genre="essay" type="button" role="radio" aria-checked="false"><b>에세이</b><small>실제 장면 · 기억 · 의미</small></button>
+          </div>
           <div class="example-row" aria-label="예시 주제">
             <span>예시</span>
             <button class="example-chip" data-example="cafe" type="button">단골을 만드는 카페 운영법</button>
             <button class="example-chip" data-example="career" type="button">신중년 재취업 준비 노트</button>
             <button class="example-chip" data-example="home" type="button">냉장고 정리로 식비 줄이기</button>
+            <button class="example-chip" data-example="fiction" type="button">막차가 끊긴 역에서 재회한 두 사람</button>
+            <button class="example-chip" data-example="essay" type="button">마지막 영업일의 다섯 장면</button>
           </div>
+          <p class="genre-guide" id="genreGuide">실용서: ‘누가, 어떤 문제를, 어떤 방법으로 해결하는가?’를 한 문장으로 적어보세요.</p>
           <div class="form-grid">
             <label>책을 쓰는 사람 <input data-field="author" placeholder="예: 김지혜" autocomplete="name"></label>
             <label>전자책 주제 <input data-field="topic" placeholder="예: 작은 카페 단골 만들기"></label>
             <label>읽을 사람 <input data-field="reader" placeholder="예: 카페를 처음 운영하는 사장님"></label>
-            <label>독자가 얻게 될 것 <input data-field="benefit" placeholder="예: 바로 실천할 단골 관리 방법 10가지"></label>
+            <label id="benefitLabel">독자가 얻게 될 것 <input data-field="benefit" placeholder="예: 바로 실천할 단골 관리 방법 10가지"></label>
           </div>
         </div>
 
         <div class="card prompt-card">
-          <div class="card-title"><span>2</span><div><h3>AI에 책 설계 요청하기</h3><p>빈칸이 채워지면 아래 프롬프트가 자동으로 완성됩니다.</p></div></div>
+          <div class="card-title"><span>2</span><div><h3>AI에 책 설계 요청하기</h3><p>내 정보를 입력하면 아래 요청문이 완성됩니다. 대괄호가 남아 있으면 먼저 채워주세요.</p></div></div>
           <div class="prompt-box"><div class="prompt-label">복사해서 ChatGPT · Claude · 뤼튼에 붙여넣기</div><pre id="planPrompt"></pre><button class="copy-button" data-copy="planPrompt" type="button">프롬프트 복사</button></div>
-          <label class="result-label">AI가 만든 제목·목차를 여기에 붙여넣으세요<textarea data-field="outline" rows="9" placeholder="AI 답변을 이곳에 붙여넣으면 자동 저장됩니다."></textarea></label>
+          <label class="result-label">AI가 만든 제목·목차를 여기에 붙여넣으세요<textarea data-field="outline" rows="9" placeholder="AI 답변을 이곳에 붙여넣으면 자동 저장되고 본문 요청문에도 반영됩니다."></textarea></label>
+          <div class="four-part-tip"><b>목차 확인 질문</b><span>01 출발 → 02 전개 → 03 변화 → 04 마무리. 내용이 겹치거나 너무 넓으면 본문을 쓰기 전에 고치세요.</span></div>
         </div>
 
         <div class="card prompt-card">
-          <div class="card-title"><span>3</span><div><h3>본문 원고 만들기</h3><p>한 번에 너무 길게 만들지 않고 PART별 4쪽씩 요청합니다.</p></div></div>
-          <div class="prompt-box"><div class="prompt-label">PART 1부터 차례로 생성하기</div><pre id="manuscriptPrompt"></pre><button class="copy-button" data-copy="manuscriptPrompt" type="button">본문 프롬프트 복사</button></div>
+          <div class="card-title"><span>3</span><div><h3>본문 원고 만들기</h3><p>목차를 확인한 뒤 한 묶음씩 요청하세요. 아래 번호를 누르면 요청문이 바뀝니다.</p></div></div>
+          <div class="part-options" role="group" aria-label="원고를 작성할 묶음"><button class="part-button selected" data-part="1" type="button">PART 1</button><button class="part-button" data-part="2" type="button">PART 2</button><button class="part-button" data-part="3" type="button">PART 3</button><button class="part-button" data-part="4" type="button">PART 4</button></div>
+          <div class="prompt-box"><div class="prompt-label">선택한 묶음의 원고 요청문</div><pre id="manuscriptPrompt"></pre><button class="copy-button" data-copy="manuscriptPrompt" type="button">본문 프롬프트 복사</button></div>
           <label class="result-label">완성된 본문을 모아두세요<textarea data-field="manuscript" rows="12" placeholder="페이지 사이는 --- 로 구분하면 Canva 정리 화면에서 자동으로 나뉩니다."></textarea></label>
-          <p class="helper">팁: PART 1이 끝나면 프롬프트의 숫자를 2, 3, 4로 바꿔 반복하세요.</p>
+          <p class="helper">팁: AI 원고에서 사실관계·실제 경험·문장 반복을 확인한 뒤 내 말투로 고치세요. 소설·에세이는 '실천 팁' 대신 장면이나 여운을 살립니다.</p>
         </div>
       </section>
 
@@ -142,7 +152,7 @@
           <label class="result-label">내가 원하는 분위기<textarea data-field="mood" rows="3" placeholder="위에서 선택하거나 직접 적어보세요."></textarea></label>
         </div>
         <div class="book-preview-wrap">
-          <div class="book-preview" id="bookPreview"><span class="preview-kicker">PRACTICAL GUIDE</span><h3 id="previewTitle">나의 전자책 제목</h3><p id="previewSubtitle">부제와 독자가 얻을 이익</p><div class="preview-line"></div><strong id="previewAuthor">저자명</strong></div>
+          <div class="book-preview" id="bookPreview"><span class="preview-kicker" id="previewGenre">PRACTICAL GUIDE</span><h3 id="previewTitle">나의 전자책 제목</h3><p id="previewSubtitle">부제와 독자가 얻을 이익</p><div class="preview-line"></div><strong id="previewAuthor">저자명</strong></div>
           <div class="preview-note"><span>미리보기</span><h3>좋은 표지는 3초 안에 이해됩니다.</h3><ul><li>제목이 가장 크게 보이나요?</li><li>누구를 위한 책인지 짐작되나요?</li><li>글자가 너무 많지는 않나요?</li></ul></div>
         </div>
       </section>
@@ -175,7 +185,7 @@
         <div class="card">
           <div class="card-title"><span>1</span><div><h3>20쪽 구성표</h3><p>본문 수가 부족하면 페이지 수보다 완성을 우선하세요.</p></div></div>
           <div class="page-map">
-            <div class="page-card cover"><b>01</b><span>표지</span></div><div class="page-card"><b>02</b><span>프롤로그</span></div><div class="page-card"><b>03</b><span>목차</span></div><div class="page-card part"><b>04—07</b><span>PART 1</span></div><div class="page-card part"><b>08—11</b><span>PART 2</span></div><div class="page-card part"><b>12—15</b><span>PART 3</span></div><div class="page-card part"><b>16—19</b><span>PART 4</span></div><div class="page-card end"><b>20</b><span>체크리스트·마무리</span></div>
+            <div class="page-card cover"><b>01</b><span>표지</span></div><div class="page-card"><b>02</b><span>프롤로그</span></div><div class="page-card"><b>03</b><span>목차</span></div><div class="page-card part"><b>04—07</b><span>PART 1</span></div><div class="page-card part"><b>08—11</b><span>PART 2</span></div><div class="page-card part"><b>12—15</b><span>PART 3</span></div><div class="page-card part"><b>16—19</b><span>PART 4</span></div><div class="page-card end"><b>20</b><span id="finalPageLabel">체크리스트·마무리</span></div>
           </div>
         </div>
         <div class="card">
@@ -216,6 +226,7 @@
           <div class="export-actions"><button class="primary-button" id="downloadButton" type="button">워크북 내용 저장</button><button class="secondary-button" id="printButton" type="button">정리 화면 인쇄</button></div>
         </div>
         <div class="completion-card" id="completionCard"><span class="confetti" aria-hidden="true">✦</span><div><h3>첫 전자책 완성을 축하합니다!</h3><p>PDF를 열어 확인했다면, 오늘의 실습은 성공입니다.</p></div><button id="completeButton" type="button">수업 완료하기</button></div>
+        <p class="after-class-note">출판 플랫폼에 등록하려면 수업 후 도서 소개·표지·본문 파일을 다시 검토하고, 해당 플랫폼의 최신 규격을 확인하세요.</p>
       </section>
 
       <div class="step-footer">
