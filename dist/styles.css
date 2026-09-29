@@ -197,6 +197,7 @@ input:focus, textarea:focus { background: white; border-color: var(--ink); }
 .step-footer { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
 .step-footer > button:first-child { justify-self: start; }
 .step-footer > button:last-child { justify-self: end; }
+.privacy-note { margin: 16px 2px 0; color: var(--ink-soft); font-size: .75rem; text-align: center; }
 .step-dots { display: flex; gap: 6px; }
 .step-dots span { width: 7px; height: 7px; background: #c9d2d7; border-radius: 50%; }
 .step-dots span.active { width: 22px; border-radius: 99px; background: var(--coral); }
@@ -247,7 +248,7 @@ dialog > div { display: flex; justify-content: flex-end; gap: 8px; }
 }
 
 @media print {
-  .topbar, .sidebar, .progress-panel, .step-footer, .copy-button, button, dialog { display: none !important; }
+  .topbar, .sidebar, .progress-panel, .step-footer, .privacy-note, .copy-button, button, dialog { display: none !important; }
   .app-shell { display: block; }
   .workspace { max-width: none; padding: 0; }
   .step-panel { display: block !important; break-after: page; }
