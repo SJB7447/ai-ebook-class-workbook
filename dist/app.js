@@ -27,12 +27,20 @@
   function loadState() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      const fields = { ...defaults.fields, ...(saved?.fields || {}) };
+      // Earlier versions used one textarea for all four PARTs. Preserve that text.
+      if (fields.manuscript && ![1, 2, 3, 4].some(part => fields[`manuscriptPart${part}`])) {
+        fields.manuscriptPart1 = fields.manuscript;
+      }
+      if (fields.imageNotes && !fields.coverImageNotes && !fields.illustrationNotes) {
+        fields.coverImageNotes = fields.imageNotes;
+      }
       return {
         ...structuredClone(defaults),
         ...saved,
         genre: genreNames[saved?.genre] ? saved.genre : 'practical',
         part: [1, 2, 3, 4].includes(Number(saved?.part)) ? Number(saved.part) : 1,
-        fields: { ...defaults.fields, ...(saved?.fields || {}) },
+        fields,
         checks: { ...(saved?.checks || {}) },
         timer: { ...defaults.timer, ...(saved?.timer || {}) }
       };
@@ -66,7 +74,21 @@
       card.classList.toggle('selected', selected);
       card.setAttribute('aria-checked', String(selected));
     });
-    $$('.part-button').forEach(button => button.classList.toggle('selected', Number(button.dataset.part) === state.part));
+    updatePartResultUI();
+  }
+
+  function updatePartResultUI() {
+    $$('.part-button').forEach(button => {
+      const part = Number(button.dataset.part);
+      button.classList.toggle('selected', part === state.part);
+      button.classList.toggle('has-answer', Boolean(field(`manuscriptPart${part}`)));
+      button.setAttribute('aria-pressed', String(part === state.part));
+    });
+    $('#partResultLabel').textContent = `PART ${state.part}`;
+    $('[data-part-result]').value = state.fields[`manuscriptPart${state.part}`] || '';
+    $('#partSaveHint').textContent = field(`manuscriptPart${state.part}`)
+      ? `PART ${state.part} 답변이 이 브라우저에 저장되었습니다. 다른 PART를 눌러도 유지됩니다.`
+      : `PART ${state.part} 답변은 비어 있습니다.`;
   }
 
   function fallback(value, text) { return value || `[${text}]`; }
@@ -125,23 +147,29 @@
   }
 
   function getPages() {
-    const text = field('manuscript');
-    if (!text) return [];
-    const split = text.split(/\n\s*---+\s*\n/g).map(x => x.trim()).filter(Boolean);
-    if (split.length > 1) return split;
-    const headingSplit = text.split(/(?=\n(?:#{1,3}\s+|(?:페이지|PAGE)\s*\d+))/gi).map(x => x.trim()).filter(Boolean);
-    return headingSplit.length > 1 ? headingSplit : [text];
+    return [1, 2, 3, 4].flatMap(part => {
+      const text = field(`manuscriptPart${part}`);
+      if (!text) return [];
+      const split = text.split(/\n\s*---+\s*\n/g).map(x => x.trim()).filter(Boolean);
+      const headingSplit = split.length > 1 ? split : text.split(/(?=\n(?:#{1,3}\s+|(?:페이지|PAGE)\s*\d+))/gi).map(x => x.trim()).filter(Boolean);
+      const sections = headingSplit.length > 1 ? headingSplit : [text];
+      return sections.map((section, index) => ({
+        part,
+        no: index < 4 ? String(4 + (part - 1) * 4 + index).padStart(2, '0') : '추가',
+        text: section
+      }));
+    });
   }
 
   function transferBlocks() {
-    const intro = field('outline');
     const pages = getPages();
     const blocks = [
-      { no: '01', title: '표지', text: [field('title'), field('subtitle'), field('coverAuthor') || field('author')].filter(Boolean).join('\n') },
-      { no: '02—03', title: '프롤로그 · 목차', text: intro }
+      { no: '01', title: '표지', text: [field('title'), field('subtitle'), field('coverLine'), field('coverAuthor') || field('author')].filter(Boolean).join('\n') },
+      { no: '02', title: '프롤로그', text: field('prologue') },
+      { no: '03', title: '목차', text: field('outline') }
     ];
-    pages.forEach((text, index) => blocks.push({ no: String(index + 4).padStart(2, '0'), title: firstLine(text) || `본문 ${index + 1}`, text }));
-    blocks.push({ no: '20', title: genreHints[state.genre].final, text: `${field('benefit')}\n\n저자: ${field('author')}`.trim() });
+    pages.forEach(page => blocks.push({ no: page.no, title: `PART ${page.part} · ${firstLine(page.text) || '본문'}`, text: page.text }));
+    if (field('ending')) blocks.push({ no: '20', title: genreHints[state.genre].final, text: field('ending') });
     return blocks;
   }
 
@@ -153,12 +181,13 @@
     const root = $('#transferList');
     root.replaceChildren();
     const pages = getPages();
-    $('#pageCount').textContent = `본문 ${pages.length}개 감지 · 20쪽은 예시 구성`;
+    const savedParts = [1, 2, 3, 4].filter(part => field(`manuscriptPart${part}`)).length;
+    $('#pageCount').textContent = `본문 ${pages.length}쪽 감지 · PART ${savedParts}/4 저장 · 20쪽은 예시 구성`;
     const blocks = transferBlocks().filter(block => block.text);
     if (!blocks.length) {
       const empty = document.createElement('div');
       empty.className = 'empty-transfer';
-      empty.textContent = '1단계에서 원고를 붙여넣으면 이곳에 자동으로 정리됩니다.';
+      empty.textContent = '1단계에서 확정한 프롤로그·목차와 PART별 답변을 입력하면 여기에 정리됩니다.';
       root.append(empty);
       return;
     }
@@ -231,8 +260,19 @@
   }
 
   function compileWorkbookText() {
-    const blocks = transferBlocks().filter(x => x.text).map(x => `[${x.no}] ${x.title}\n${x.text}`).join('\n\n--------------------------------\n\n');
-    return `AI 전자책 디자인·출판 클래스 — 실습 결과\n\n책 종류: ${genreNames[state.genre]}\n책 제목: ${field('title')}\n부제: ${field('subtitle')}\n저자: ${field('author')}\n독자: ${field('reader')}\n${genreHints[state.genre].benefit}: ${field('benefit')}\n표지 분위기: ${field('mood')}\n이미지 메모: ${field('imageNotes')}\n\n================================\n\n${blocks}`;
+    const answers = [
+      ['AI 책 설계 답변 원본', field('planResponse')],
+      ...[1, 2, 3, 4].map(part => [`PART ${part} 답변`, field(`manuscriptPart${part}`)]),
+      ['표지 이미지 결과 메모', field('coverImageNotes')],
+      ['삽화 이미지 결과 메모', field('illustrationNotes')]
+    ].filter(([, value]) => value).map(([label, value]) => `[${label}]\n${value}`).join('\n\n--------------------------------\n\n');
+    return `AI 전자책 디자인·출판 클래스 — 실습 작업노트\n\n책 종류: ${genreNames[state.genre]}\n책 제목: ${field('title')}\n부제: ${field('subtitle')}\n저자: ${field('author')}\n독자: ${field('reader')}\n${genreHints[state.genre].benefit}: ${field('benefit')}\n표지 분위기: ${field('mood')}\n\n======= Canva로 옮길 최종 내용 =======\n\n${compileCanvaText()}\n\n======= AI 답변 및 작업 메모 =======\n\n${answers}`;
+  }
+
+  function compileCanvaText() {
+    return transferBlocks().filter(block => block.text)
+      .map(block => `[${block.no}] ${block.title}\n${block.text}`)
+      .join('\n\n--------------------------------\n\n');
   }
 
   function downloadWorkbook() {
@@ -260,7 +300,7 @@
     if (state.timer.running) saveState(false);
   }
 
-  function updateAll() { updateGenre(); updatePrompts(); updatePreview(); renderTransfer(); updateProgress(); }
+  function updateAll() { updateGenre(); updatePrompts(); updatePreview(); updatePartResultUI(); renderTransfer(); updateProgress(); }
 
   $$('[data-field]').forEach(el => el.addEventListener('input', () => {
     state.fields[el.dataset.field] = el.value;
@@ -270,6 +310,15 @@
     }
     updateAll(); saveState();
   }));
+
+  $('[data-part-result]').addEventListener('input', event => {
+    state.fields[`manuscriptPart${state.part}`] = event.target.value;
+    $('#partSaveHint').textContent = event.target.value.trim()
+      ? `PART ${state.part} 답변이 이 브라우저에 저장되었습니다. 다른 PART를 눌러도 유지됩니다.`
+      : `PART ${state.part} 답변은 비어 있습니다.`;
+    $(`.part-button[data-part="${state.part}"]`).classList.toggle('has-answer', Boolean(event.target.value.trim()));
+    renderTransfer(); saveState();
+  });
 
   $$('[data-check]').forEach(el => el.addEventListener('change', () => {
     state.checks[el.dataset.check] = el.checked;
@@ -294,7 +343,11 @@
   }));
   $$('.copy-button').forEach(button => button.addEventListener('click', () => copyText($(`#${button.dataset.copy}`).textContent)));
 
-  $('#copyAllButton').addEventListener('click', () => copyText(compileWorkbookText()));
+  $('#copyAllButton').addEventListener('click', () => {
+    const content = compileCanvaText();
+    if (!content) { showToast('먼저 표지·원고 내용을 입력해 주세요.'); return; }
+    copyText(content);
+  });
   $('#prevButton').addEventListener('click', () => goToStep(state.currentStep - 1));
   $('#nextButton').addEventListener('click', () => {
     if (!state.completedSteps.includes(state.currentStep)) state.completedSteps.push(state.currentStep);
@@ -303,6 +356,12 @@
     else showToast('최종 점검 내용을 저장했습니다.');
   });
   $('#sampleButton').addEventListener('click', () => fillSample('cafe'));
+  $('#openFeedbackButton').addEventListener('click', () => {
+    const frame = $('#feedbackFrame');
+    if (!frame.src || frame.src === 'about:blank') frame.src = frame.dataset.src;
+    $('#feedbackDialog').showModal();
+  });
+  $('#closeFeedbackButton').addEventListener('click', () => $('#feedbackDialog').close());
   $('#resetButton').addEventListener('click', () => $('#resetDialog').showModal());
   $('#cancelReset').addEventListener('click', () => $('#resetDialog').close());
   $('#confirmReset').addEventListener('click', () => {
