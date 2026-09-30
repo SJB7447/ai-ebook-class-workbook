@@ -240,7 +240,10 @@
         <div class="step-dots" id="stepDots" aria-label="현재 단계"><span class="active"></span><span></span><span></span><span></span><span></span></div>
         <button class="primary-button" id="nextButton" type="button">저장하고 다음 단계</button>
       </div>
-      <div class="feedback-entry"><div><b>사용 중 막히거나 개선 의견이 있나요?</b><span>기능 문의·오류 제보·새 기능 제안을 보내주세요.</span></div><button class="secondary-button" id="openFeedbackButton" type="button">의견 보내기</button></div>
+      <div class="contact-grid" aria-label="문의하기">
+        <div class="feedback-entry"><div><b>웹앱 사용·기능 문의</b><span>오류 제보와 기능 개선 의견을 보내주세요.</span></div><button class="secondary-button" id="openFeedbackButton" type="button">기능 문의하기</button></div>
+        <div class="feedback-entry"><div><b>강의 문의</b><span>수강, 일정·비용, 기관·단체 출강을 문의하세요.</span></div><button class="secondary-button" id="openClassInquiryButton" type="button">강의 문의하기</button></div>
+      </div>
       <p class="privacy-note">방문·페이지 조회만 익명으로 집계합니다. 입력한 책 정보와 원고는 통계나 문의에 자동 첨부되지 않습니다.</p>
     </main>
   </div>
@@ -252,6 +255,12 @@
     <p>Google Forms가 이 창에 표시됩니다. 책 정보와 원고는 자동으로 전송되지 않으며, 직접 적은 내용만 제출됩니다.</p>
     <iframe id="feedbackFrame" title="AI 전자책 클래스 문의·개선 의견" loading="lazy" data-src="https://docs.google.com/forms/d/e/1FAIpQLSf-CfSWP35_afdRgBe-eIFAGbPbBzVe_oVosKX8vd6GRFbRrQ/viewform?embedded=true"></iframe>
     <p class="feedback-fallback">폼이 보이지 않으면 <a href="https://docs.google.com/forms/d/e/1FAIpQLSf-CfSWP35_afdRgBe-eIFAGbPbBzVe_oVosKX8vd6GRFbRrQ/viewform" target="_blank" rel="noopener noreferrer">새 창에서 열기</a></p>
+  </dialog>
+  <dialog id="classInquiryDialog" aria-labelledby="classInquiryTitle" class="feedback-dialog">
+    <div class="feedback-heading"><div><span class="eyebrow">AI 전자책 디자인·출판 클래스</span><h3 id="classInquiryTitle">강의 문의</h3></div><button type="button" id="closeClassInquiryButton" class="icon-button" aria-label="강의 문의 창 닫기">×</button></div>
+    <p>Google Forms가 이 창에 표시됩니다. 워크북에 입력한 책 정보와 원고는 자동으로 전송되지 않습니다.</p>
+    <iframe id="classInquiryFrame" title="AI 전자책 디자인·출판 클래스 강의 문의" loading="lazy" data-src="https://docs.google.com/forms/d/e/1FAIpQLSddBkKUoMkVDs7JXZ6GbwF_0oX88Z1XkLr7XycM8uDnlcGMEw/viewform?embedded=true"></iframe>
+    <p class="feedback-fallback">폼이 보이지 않으면 <a href="https://docs.google.com/forms/d/e/1FAIpQLSddBkKUoMkVDs7JXZ6GbwF_0oX88Z1XkLr7XycM8uDnlcGMEw/viewform" target="_blank" rel="noopener noreferrer">새 창에서 열기</a></p>
   </dialog>
   <script src="app.js"></script>
   <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"c3d433fd38f844de80b11081f83c58ae","spa":false}'></script>

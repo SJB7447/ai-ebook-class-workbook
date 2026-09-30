@@ -356,12 +356,15 @@
     else showToast('최종 점검 내용을 저장했습니다.');
   });
   $('#sampleButton').addEventListener('click', () => fillSample('cafe'));
-  $('#openFeedbackButton').addEventListener('click', () => {
-    const frame = $('#feedbackFrame');
+  function openFormDialog(frameSelector, dialogSelector) {
+    const frame = $(frameSelector);
     if (!frame.src || frame.src === 'about:blank') frame.src = frame.dataset.src;
-    $('#feedbackDialog').showModal();
-  });
+    $(dialogSelector).showModal();
+  }
+  $('#openFeedbackButton').addEventListener('click', () => openFormDialog('#feedbackFrame', '#feedbackDialog'));
   $('#closeFeedbackButton').addEventListener('click', () => $('#feedbackDialog').close());
+  $('#openClassInquiryButton').addEventListener('click', () => openFormDialog('#classInquiryFrame', '#classInquiryDialog'));
+  $('#closeClassInquiryButton').addEventListener('click', () => $('#classInquiryDialog').close());
   $('#resetButton').addEventListener('click', () => $('#resetDialog').showModal());
   $('#cancelReset').addEventListener('click', () => $('#resetDialog').close());
   $('#confirmReset').addEventListener('click', () => {
